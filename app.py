@@ -60,8 +60,6 @@ elif tab == "Log fuel":
 
 ### Dashboard tab 
 elif tab == "Dashboard":
-    st.header("Dashboard")
-
     journeys = pd.read_sql("SELECT * FROM journeys", conn)
     fuel_logs = pd.read_sql("SELECT * FROM fuel_logs", conn)
     users = pd.read_sql("SELECT * FROM users", conn)
@@ -99,7 +97,6 @@ elif tab == "Dashboard":
 
     #running statistics 
     if not journeys.empty:
-        st.subheader("Running Statistics")
         journeys_summary = journeys.groupby('Driver')['Miles driven'].sum().reset_index()
         journeys_summary.rename(columns={'Miles driven': 'Total miles driven'}, inplace=True)
 
@@ -113,62 +110,55 @@ elif tab == "Dashboard":
     comparison['Difference'] = comparison['Total miles paid for'] - comparison['Total miles driven']
 
     st.subheader("Balances")
-
-    for _, row in comparison.iterrows():
-        driver = row['Driver']
-        diff = row['Difference']
-        if diff > 0:
-            bg_color = "#d4edda"
-            text_color = "#155724"
-            status = "Paid more than driven"
-        elif diff < 0:
-            bg_color = "#f8d7da"  
-            text_color = "#721c24"
-            status = "Driven more than paid for"
-        else:
-            bg_color = "#e2e3e5"  # grey
-            text_color = "#383d41"
-            status = "Balanced"
-
-    st.markdown("""
-        <style>
-        .card {
-                padding: 15px;
-                border-radius: 10px;
-                margin: 10px;
-                font-size: 18px;
-                font-weight: bold;
-                text-align: center;
-                box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
-        }
-        .green {background-color: #d4edda; color: #155724;}
-        .red {background-color: #f8d7da; color: #721c24;}
-        .grey {background-color: #e2e3e5; color: #383d41;}
-        </style>
-        """, unsafe_allow_html=True)
-
-# Display cards in a grid
-    cols = st.columns(2)  # 2 cards per row
-    for i, row in comparison.iterrows():
-        driver = row['Driver']
-        diff = row['Difference']
-
-        if diff > 0:
-            css_class = "green"
-            status = "Paid more than driven"
-        elif diff < 0:
-            css_class = "red"
-            status = "Driven more than paid for"
-        else:
-            css_class = "grey"
-            status = "Balanced"
-
-    with cols[i % 2]:
-        st.markdown(
-            f"<div class='card {css_class}'>{driver}<br>{status}<br>{abs(diff):.1f} miles</div>",
-            unsafe_allow_html=True
-        )
     
+    cols_per_row = 2
+
+    for i in range(0, len(comparison), cols_per_row):
+        cols = st.columns(cols_per_row)
+        for j, (_, row) in enumerate(comparison.iloc[i:i+cols_per_row].iterrows()):
+            driver = row['Driver']
+            diff = row['Difference']
+
+            if diff > 0:
+                bg_color = "#d4edda"  
+                text_color = "#155724"
+                status = "Paid more than driven"
+                extra_info = ""
+            elif diff < 0:
+                bg_color = "#f8d7da"  
+                text_color = "#721c24"
+                status = "Driven more than paid for"
+                amount_owed = abs(diff) * (135.33/100) ####### CHANGE WEEKLY 
+                extra_info = f"<br><span style='font-size:16px;'>Amount to pay: £{amount_owed:.2f}</span>"
+            else:
+                bg_color = "#e2e3e5"  
+                text_color = "#383d41"
+                status = "Balanced"
+                extra_info = ""
+
+            cols[j].markdown(
+                f"""
+                <div style="
+                    background-color:{bg_color};
+                    color:{text_color};
+                    padding:15px;
+                    border-radius:10px;
+                    margin-bottom:10px;
+                    font-size:18px;
+                    font-weight:bold;
+                    text-align:center;
+                    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+                ">
+                    {driver}<br>
+                    {status}<br>
+                    ({abs(diff):.1f} miles)<br>
+                    {extra_info}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
     #tables 
     st.subheader("Running totals")
     st.dataframe(comparison, hide_index=True)
@@ -178,4 +168,6 @@ elif tab == "Dashboard":
 
     st.subheader("Fuel")
     st.dataframe(fuel_logs.drop(columns=['id_x', 'id_y'], errors='ignore'), hide_index=True)
-    st.write("Miles paid for is based on 33MPG and a conversion of 1 gallon to 4.5 litres, so each litre pays for 7.3 miles of driving")
+    st.write("Miles paid for is based on 33MPG and a conversion of 1 gallon to 4.5 litres, so each litre pays for 7.3 miles of driving.")
+    st.write("Balance to pay to settle up is based on the current UK average unleaded price per litre, updated weekly using RAC data:")
+    st.write("https://www.rac.co.uk/drive/advice/fuel-watch/#what-are-the-latest-uk-petrol-prices-and-diesel-prices")
