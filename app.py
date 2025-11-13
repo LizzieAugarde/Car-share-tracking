@@ -171,3 +171,11 @@ elif tab == "Dashboard":
     st.write("Miles paid for is based on 33MPG and a conversion of 1 gallon to 4.5 litres, so each litre pays for 7.3 miles of driving.")
     st.write("Balance to pay to settle up is based on the current UK average unleaded price per litre, updated weekly using RAC data:")
     st.write("https://www.rac.co.uk/drive/advice/fuel-watch/#what-are-the-latest-uk-petrol-prices-and-diesel-prices")
+
+
+
+    ####### NEXT 
+    ## check the balance makes sense 
+    ## add the abiltiy to clear allt he data 
+    ## add the ability to settle up 
+    ## deploy 
