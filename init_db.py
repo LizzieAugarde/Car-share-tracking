@@ -14,11 +14,12 @@ CREATE TABLE IF NOT EXISTS users (
 
 c.execute('''
 CREATE TABLE IF NOT EXISTS journeys (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT,
-        Driver INTEGER,
-        Date TEXT,
-        Description TEXT,
-        Mileage REAL,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        name TEXT,
+        date TEXT,
+        description TEXT,
+        mileage REAL,
         FOREIGN KEY(user_id) REFERENCES users(id)
 )
 ''')
