@@ -14,11 +14,11 @@ CREATE TABLE IF NOT EXISTS users (
 
 c.execute('''
 CREATE TABLE IF NOT EXISTS journeys (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        date TEXT,
-        description TEXT,
-        mileage REAL,
+        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        Driver INTEGER,
+        Date TEXT,
+        Description TEXT,
+        Mileage REAL,
         FOREIGN KEY(user_id) REFERENCES users(id)
 )
 ''')
@@ -33,6 +33,10 @@ CREATE TABLE IF NOT EXISTS fuel_logs (
         FOREIGN KEY(user_id) REFERENCES users(id)
 )
 ''')
+
+# users
+c.execute("INSERT INTO users (name) VALUES ('Lizzie & Callum')")
+c.execute("INSERT INTO users (name) VALUES ('Ruth')")
 
 conn.commit()
 conn.close()

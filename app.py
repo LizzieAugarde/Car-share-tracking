@@ -8,16 +8,16 @@ from datetime import date
 conn = sqlite3.connect('car_log.db', check_same_thread = False)
 c = conn.cursor()
 
-st.title("🚗 Car Sharing Log")
+st.title("🚗 Car Sharing")
 
 
 # tabs 
-tab = st.sidebar.radio("Go to", ["Log journey", "Log fuel", "Dashboard"])
+tab = st.sidebar.radio("Go to", ["Dashboard", "Log journey", "Log fuel"])
 
 
 # helper function - get users 
 def get_users():
-    c.execute("SELECT id, name FROM users")
+    c.execute("SELECT ID, Driver FROM users")
     return c.fetchall()
 
 
@@ -32,8 +32,8 @@ if tab == "Log journey":
     mileage_input = st.number_input("Miles driven", min_value = 0.0)
 
     if st.button("Submit journey"):
-        c.execute("INSERT INTO journeys (user_id, date, description, mileage) VALUES (?,?,?,?)",
-                (user_dict[user_input], str(date_input), desc_input, mileage_input))
+        c.execute("INSERT INTO journeys (Driver, Date, Description, Mileage) VALUES (?,?,?,?)",
+                (user_input, str(date_input), desc_input, mileage_input))
         conn.commit() 
         st.success("Journey logged")
 
@@ -45,11 +45,11 @@ elif tab == "Log fuel":
     user_input = st.selectbox("Driver", list(user_dict.keys()))
     date_input = st.date_input("Date", date.today())
     litres = st.number_input("Litres", min_value = 0.0)
-    cost = st.number_input("Cost (£)", min_value = 0.0)
+    cost = st.number_input("Cost", min_value = 0.0)
 
     if st.button("Submit fuel fill up"):
-        c.execute("INSERT INTO fuel_logs (user_id, date, litres, cost) VALUES (?,?,?,?)", 
-                (user_dict[user_input], str(date_input), litres, cost))
+        c.execute("INSERT INTO fuel_logs (Driver, Date, Litres, Cost) VALUES (?,?,?,?)", 
+                (user_input, str(date_input), litres, cost))
         conn.commit()
         st.success("Fill up logged")
 
@@ -63,16 +63,11 @@ elif tab == "Dashboard":
     users = pd.read_sql("SELECT * FROM users", conn)
 
     if not journeys.empty:
-        journeys['distance'] = journeys['mileage']
-        summary = journeys.groupby('user_id')['distance'].sum().reset_index()
-        summary = summary.merge(users, left_on='user_id', right_on='id')
-        st.subheader("Total Distance per User")
-        st.bar_chart(summary.set_index('name')['distance'])
-
-    if not fuel_logs.empty:
-        fuel_logs['efficiency'] = fuel_logs['mileage'] / fuel_logs['litres']
-        st.subheader("Fuel Efficiency Over Time")
-        st.line_chart(fuel_logs[['date', 'efficiency']].set_index('date'))
+        journeys['Distance'] = journeys['Mileage']
+        summary = journeys.groupby('Driver')['Distance'].sum().reset_index()
+        summary = summary.merge(users, left_on='Driver', right_on='ID')
+        st.subheader("Total distance per driver")
+        st.bar_chart(summary.set_index('Driver')['Distance'])
 
     st.subheader("Raw Data")
     st.write("Journeys", journeys)
