@@ -14,18 +14,6 @@ st.title("🚗 Car Sharing")
 st.header("Dashboard")
 
 
-# navigation sidebar 
-if st.button("Menu"):
-    st.session_state.show_sidebar = True 
-
-if st.session_state.show_sidebar:
-    with st.sidebar:
-        tabs = ["Dashboard", "Log a journey", "Log fuel fill up"]
-        choice = st.radio(" ", tabs)
-        st.session_state.selected_tab = choice
-        st.session_state.show_sidebar = False
-
-
 # load data
 journeys = pd.read_sql("SELECT * FROM journeys", conn)
 fuel_logs = pd.read_sql("SELECT * FROM fuel_logs", conn)
@@ -62,7 +50,7 @@ if not fuel_logs.empty:
     fuel_logs['Miles paid for'] = fuel_logs['Litres added'] * (33/4.54609)
         
 
-#running statistics 
+#running statistics/balances
 if not journeys.empty:
     journeys_summary = journeys.groupby('Driver')['Miles driven'].sum().reset_index()
     journeys_summary.rename(columns={'Miles driven': 'Total miles driven'}, inplace=True)
@@ -75,9 +63,7 @@ comparison = journeys_summary.merge(miles_paid_summary, on = 'Driver', how = 'ou
 comparison['Total miles paid for'] = comparison['Total miles paid for'].fillna(0)
 comparison['Total miles driven'] = comparison['Total miles driven'].fillna(0)
 comparison['Difference'] = comparison['Total miles paid for'] - comparison['Total miles driven']
-
-st.subheader("Balances")
-        
+       
 cols_per_row = 2
 
 for i in range(0, len(comparison), cols_per_row):
