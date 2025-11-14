@@ -92,8 +92,8 @@ elif tab == "Dashboard":
     }, inplace=True)
 
     fuel_logs['Date'] = pd.to_datetime(fuel_logs['Date']).dt.strftime('%d/%m/%Y')
-      
-            
+
+
     #adding miles paid for to fuel logs table 
     if not fuel_logs.empty:
         fuel_logs['Miles paid for'] = fuel_logs['Litres added'] * (33/4.54609)
@@ -186,7 +186,7 @@ elif tab == "Dashboard":
         conn.commit()
         conn.close()
 
-    if not fuel_logs.empty and not journeys.empty:
+    if not fuel_logs.empty or not journeys.empty:
         if st.button("Clear all data"):
             clear_data()
             st.success("All data cleared")
