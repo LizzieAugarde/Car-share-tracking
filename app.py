@@ -14,9 +14,27 @@ c = conn.cursor()
 st.title("🚗 Car Sharing")
 
 
-# set up tabs 
-tab = st.sidebar.radio("Go to", ["Dashboard", "Log journey", "Log fuel"])
+# initialise
+if "show_sidebar" not in st.session_state:
+    st.session_state.show_sidebar = False
 
+if "selected_tab" not in st.session_state:
+    st.session_state.selected_tab = None
+
+
+# navigation sidebar 
+if "show_sidebar" not in st.session_state:
+    st.session_state.show_sidebar = True
+
+if st.button("Menu"):
+    st.session_state.show_sidebar = True
+
+if st.session_state.show_sidebar:
+    with st.sidebar:
+        st.page_link("pages/dashboard.py", label = "Dashboard")
+        st.page_link("pages/log_a_journey.py", label = "Log a journey")
+        st.page_link("pages/log_fuel.py", label = "Log fuel fill up")
+        st.session_state.show_sidebar = False
 
 # get users for dropdown
 def get_users():
@@ -24,6 +42,7 @@ def get_users():
     return c.fetchall()
 
 
+tab = st.session_state.selected_tab
 ### Log a journey tab
 if tab == "Log journey":
     st.header("Log a journey")
@@ -33,10 +52,10 @@ if tab == "Log journey":
     date_input = st.date_input("Date", date.today())
     desc_input = st.text_input("Description")
     mileage_input = st.number_input("Miles driven", min_value = 0.0)
-
+    
     if st.button("Submit journey"):
         c.execute("INSERT INTO journeys (user_id, date, description, mileage) VALUES (?,?,?,?)",
-                (user_dict[user_input], str(date_input), desc_input, mileage_input))
+                 (user_dict[user_input], str(date_input), desc_input, mileage_input))
         conn.commit() 
         st.success("Journey logged")
 
@@ -53,7 +72,7 @@ elif tab == "Log fuel":
 
     if st.button("Submit fuel fill up"):
         c.execute("INSERT INTO fuel_logs (user_id, date, litres, cost) VALUES (?,?,?,?)", 
-                (user_dict[user_input], str(date_input), litres, cost))
+                 (user_dict[user_input], str(date_input), litres, cost))
         conn.commit()
         st.success("Fill up logged")
 
@@ -64,15 +83,15 @@ elif tab == "Dashboard":
     fuel_logs = pd.read_sql("SELECT * FROM fuel_logs", conn)
     users = pd.read_sql("SELECT * FROM users", conn)
 
-    
+        
     #adding names rather than user IDs
     journeys = journeys.merge(users[['id', 'name']], left_on='user_id', right_on='id')
     journeys.drop(columns=['user_id'], inplace = True)
 
     fuel_logs = fuel_logs.merge(users[['id', 'name']], left_on='user_id', right_on='id')
     fuel_logs.drop(columns=['user_id'], inplace = True)  
-    
-    
+        
+        
     #renaming columns in the display tables 
     journeys.rename(columns={
         'name': 'Driver',
@@ -81,7 +100,7 @@ elif tab == "Dashboard":
         'mileage': 'Miles driven'
     }, inplace=True)
 
-    
+        
     fuel_logs.rename(columns={
         'name': 'Driver',
         'date': 'Date',
@@ -89,11 +108,11 @@ elif tab == "Dashboard":
         'cost': 'Cost'
     }, inplace=True)
 
-    
+        
     #adding miles paid for to fuel logs table 
     if not fuel_logs.empty:
         fuel_logs['Miles paid for'] = fuel_logs['Litres added'] * (33/4.54609)
-    
+        
 
     #running statistics 
     if not journeys.empty:
@@ -110,7 +129,7 @@ elif tab == "Dashboard":
     comparison['Difference'] = comparison['Total miles paid for'] - comparison['Total miles driven']
 
     st.subheader("Balances")
-    
+        
     cols_per_row = 2
 
     for i in range(0, len(comparison), cols_per_row):
@@ -172,10 +191,11 @@ elif tab == "Dashboard":
     st.write("Balance to pay to settle up is based on the current UK average unleaded price per litre, updated weekly using RAC data:")
     st.write("https://www.rac.co.uk/drive/advice/fuel-watch/#what-are-the-latest-uk-petrol-prices-and-diesel-prices")
 
-
+else:
+    st.write("Click the menu button to navigate.")
 
     ####### NEXT 
-    ## check the balance makes sense 
+   
     ## add the abiltiy to clear allt he data 
-    ## add the ability to settle up 
-    ## deploy 
+  
+    #reformat dates
