@@ -82,6 +82,7 @@ elif tab == "Dashboard":
         'mileage': 'Miles driven'
     }, inplace=True)
 
+    journeys['Date'] = pd.to_datetime(journeys['Date']).dt.strftime('%d/%m/%Y')
             
     fuel_logs.rename(columns={
         'name': 'Driver',
@@ -90,6 +91,8 @@ elif tab == "Dashboard":
         'cost': 'Cost'
     }, inplace=True)
 
+    fuel_logs['Date'] = pd.to_datetime(fuel_logs['Date']).dt.strftime('%d/%m/%Y')
+      
             
     #adding miles paid for to fuel logs table 
     if not fuel_logs.empty:
