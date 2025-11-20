@@ -10,8 +10,7 @@ from datetime import date
 # connect to the database
 @st.cache_resource
 def get_connection():
-    conn = sqlite3.connect('car_log.db', check_same_thread = False)
-    return conn
+    return sqlite3.connect('car_log.db', check_same_thread = False)
 
 conn = get_connection() 
 c = conn.cursor()
@@ -189,7 +188,6 @@ elif tab == "Dashboard":
         for table in tables_to_clear:
             c.execute(f"DELETE FROM {table};")
         conn.commit()
-        conn.close()
 
     if not fuel_logs.empty or not journeys.empty:
         if st.button("Clear all data"):
