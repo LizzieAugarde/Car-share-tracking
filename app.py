@@ -8,7 +8,12 @@ from datetime import date
 
 ### Prep 
 # connect to the database
-conn = sqlite3.connect('car_log.db', check_same_thread = False)
+@st.cache_resource
+def get_connection():
+    conn = sqlite3.connect('car_log.db', check_same_thread = False)
+    return conn
+
+conn = get_connection() 
 c = conn.cursor()
 
 st.title("🚗 Car Sharing")
