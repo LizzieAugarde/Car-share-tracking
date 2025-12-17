@@ -1,16 +1,29 @@
 ########## CAR SHARING APP SCRIPT ##########
 
 import streamlit as st
+import psycopg2
 import sqlite3
 import pandas as pd
 from datetime import date
+from init_db import init_db
 
 
 ### Prep 
-# connect to the database
+# set up and connect to the database
 @st.cache_resource
+def setup_database():
+    init_db()
+
+setup_database()
+
 def get_connection():
-    return sqlite3.connect('car_log.db', check_same_thread = False)
+    return psycopg2.connect(
+        host=st.secrets["db"]["host"],
+        database=st.secrets["db"]["name"],
+        user=st.secrets["db"]["user"],
+        password=st.secrets["db"]["password"],
+        port=st.secrets["db"]["port"]
+    )
 
 conn = get_connection() 
 c = conn.cursor()

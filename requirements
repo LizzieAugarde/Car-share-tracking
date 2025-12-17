@@ -1,0 +1,6 @@
+psycopg2-binary
+streamlit
+sqlite3
+pandas
+datetime
+
